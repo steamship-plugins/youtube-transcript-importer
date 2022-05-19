@@ -9,7 +9,6 @@
   "entrypoint": "src.api.handler",
   "plugin": {
     "type": "fileImporter",
-    "path": "/import_file",
     "isTrainable": false,
     "configTemplate": {
       "n_tickets": {
