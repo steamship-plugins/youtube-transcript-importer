@@ -1,0 +1,2 @@
+git+https://github.com/nludb/python-client.git@main
+zenpy==2.0.24
