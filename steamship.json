@@ -1,41 +1,41 @@
 {
-  "type": "plugin",
-  "name": "zendesk-file-importer",
-  "handle": "zendesk-file-importer",
-  "version": "0.0.1",
-  "description": "",
   "author": "",
-  "public": true,
+  "description": "",
   "entrypoint": "src.api.handler",
+  "handle": "zendesk-file-importer",
+  "name": "zendesk-file-importer",
+  "public": true,
+  "type": "plugin",
+  "version": "0.0.1",
   "plugin": {
-    "type": "fileImporter",
     "isTrainable": false,
-    "configTemplate": {
-      "n_tickets": {
-        "type": "number",
-        "description": "Number of tickets you want to scrape."
-      },
-      "t_start": {
-        "type": "string",
-        "description": "The start timestamp used to query Zendesk tickets."
-      },
-      "t_end": {
-        "type": "string",
-        "description": "The end timestamp used to query Zendesk tickets."
-      },
-      "zendesk_email": {
-        "type": "string",
-        "description": "Email used to authenticate with Zendesk."
-      },
-      "zendesk_password": {
-        "type": "string",
-        "description": "Password used to authenticate with Zendesk."
-      },
-      "zendesk_subdomain": {
-        "type": "string",
-        "description": "Subdomain used to authenticate with Zendesk."
-      }
+    "transport": "jsonOverHttp",
+    "type": "fileImporter"
+  },
+  "configTemplate": {
+    "n_tickets": {
+      "type": "number",
+      "description": "Number of tickets you want to scrape."
     },
-    "transport": "jsonOverHttp"
+    "t_start": {
+      "type": "string",
+      "description": "The start timestamp used to query Zendesk tickets."
+    },
+    "t_end": {
+      "type": "string",
+      "description": "The end timestamp used to query Zendesk tickets."
+    },
+    "zendesk_email": {
+      "type": "string",
+      "description": "Email used to authenticate with Zendesk."
+    },
+    "zendesk_password": {
+      "type": "string",
+      "description": "Password used to authenticate with Zendesk."
+    },
+    "zendesk_subdomain": {
+      "type": "string",
+      "description": "Subdomain used to authenticate with Zendesk."
+    }
   }
 }
