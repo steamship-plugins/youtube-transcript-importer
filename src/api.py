@@ -41,7 +41,7 @@ class ZendeskFileImporter(FileImporter):
     def run(self, request: PluginRequest[FileImportPluginInput]) -> Response[RawDataPluginOutput]:
         """Import zendesk tickets to an archive file.
 
-        Each file represents an archive collecting tickets using blocks.
+        Each file represents an archive collecting a list of tickets.
         """
         n_tickets = int(self.config["n_tickets"])
         t_start = datetime.strptime(self.config["t_start"], DATETIME_FORMAT)
