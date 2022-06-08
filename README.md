@@ -1,25 +1,50 @@
-# Steamship File Importer Plugin Template
+# Zendesk File Importer
 
-This project contains a File Importer Plugin Template that you can customize and deploy.
+This plugin imports Zendesk tickets to be blockified by
+the [zendesk-blockifier](https://github.com/steamship-plugins/zendesk-blockifier).
 
-In Steamship, **File Importers** make it easy to import data into the Steamship Engine. For example, you might create a 
+To instantiate this plugin, you must provide the following configuration parameters:
 
-* **Notion Importer** to import Notion pages given a Page ID
-* **Wikipedia Importer** to import Wikipedia content given a Wikipedia URL
-* **YouTube Importer** to import the audio-track of a video given a YouTube URL
+| Parameter | Description                                        | DType  |
+|-----------|----------------------------------------------------|--------|
+| n_tickets | Number of tickets you want to scrape.              | number |
+| t_start   | The start timestamp used to query Zendesk tickets. | string |
+| t_end   | The end timestamp used to query Zendesk tickets.   | string |
+| zendesk_email   | Email used to authenticate with Zendesk.           | string |
+| zendesk_password   | Password used to authenticate with Zendesk.        | string |
+| zendesk_subdomain   | Subdomain used to authenticate with Zendesk.       | string       |
 
 ## Getting Started
 
-The best way to use this template is with the Steamship CLI
+### Usage
 
-1. Install the Steamship CLI: `npm install -g @steamship.cli`
-2. Create a new Steamship Project: `ship create`
-3. Choose the **Plugin** project type
-4. Choose the **File Importer** plugin type
+Once deployed, the Zendesk File Importer can be referenced by the handle `zendesk-file-importer`.
 
-A copy of this repository will cloned and configured for you.
+```python
+from steamship import File, Plugin, PluginInstance, Steamship
 
-## Developer Setup
+IMPORTER_HANDLE = "zendesk-file-importer"
+config = {
+    "n_tickets": "FILL_IN",
+    "t_start": "FILL_IN",
+    "t_end": "FILL_IN",
+    "zendesk_email": "FILL_IN",
+    "zendesk_password": "FILL_IN",
+    "zendesk_subdomain": "FILL_IN",
+}
+client = Steamship()
+plugin = Plugin.get(client, IMPORTER_HANDLE).data
+plugin_instance = PluginInstance.create(
+    client,
+    plugin_handle=IMPORTER_HANDLE,
+    upsert=False,
+    plugin_id=plugin.id,
+    config=config,
+).data
+file = File.create(client, plugin_instance=plugin_instance.handle)
+```
+
+## Contributing
 
 We recommend using a Python virtual environments for development.
 To set one up, run the following command from this directory:
@@ -45,14 +70,11 @@ python -m pip install -r requirements.txt
 
 ## Developing
 
-All the code for this plugin is located in the `src/api.py` file:
-
-* The `FileImporterPlugin` class
-* The `/import_file` endpoint
+All the code for this plugin is located in the `src/api.py` file.
 
 ## Testing
 
-Tests are located in the `test/test_api.py` file. You can run them with:
+Tests are located in the `test/` folder. You can run them with:
 
 ```bash
 pytest
@@ -62,30 +84,10 @@ We have provided sample data in the `test_data/` folder.
 
 ## Deploying
 
-Deploy your converter to Steamship by running:
+Deploy your plugin to Steamship by running:
 
 ```bash
-ship deploy --register-plugin
+ship plugin:deploy
 ```
 
-That will deploy your app to Steamship and register it as a plugin for use.
-
-## Using
-
-Once deployed, your File Importer Plugin can be referenced by the handle in your `steamship.json` file.
-
-```python
-from steamship import Steamship, ImportRequest
-
-MY_PLUGIN_HANDLE = ".. fill this out .."
-
-client = Steamship()
-request = ImportRequest() # Provide the appropriate parameters
-file = client.create_file(importer=MY_PLUGIN_HANDLE, request=request)
-```
-
-## Sharing
-
-Plesae share what you've built with hello@steamship.com! 
-
-We would love take a look, hear your suggestions, help where we can, and share what you've made with the community.
+That will deploy your plugin to Steamship and register it as a plugin for use.
