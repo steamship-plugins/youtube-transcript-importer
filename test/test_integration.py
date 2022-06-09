@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from test.test_unit import _load_config
 
 from steamship import File, MimeTypes, Plugin, PluginInstance, Steamship
+from zenpy import Zenpy
 
 FILE_IMPORTER_HANDLE = "zendesk-file-importer"
 ENVIRONMENT = "staging"
@@ -44,6 +45,35 @@ def test_file_importer():
     file = file.data
     file_raw_data = file.raw().data
     _test_response(n_tickets, file, file_raw_data)
+
+
+def test_file_importer_all_tickets():
+    """Test the Zendesk File Importer via an integration test."""
+    client = _get_steamship_client()
+    n_tickets = -1
+    config = _load_config(n_tickets, datetime.today() - timedelta(weeks=4), datetime.today())
+
+    importer = _get_plugin_instance(config=config)
+
+    file = File.create(client, plugin_instance=importer.handle)
+    file.wait()
+    file = file.data
+    file_raw_data = file.raw().data
+
+    zendesk_credentials = {
+        "email": config["zendesk_email"],
+        "password": config["zendesk_password"],
+        "subdomain": config["zendesk_subdomain"],
+    }
+
+    zenpy_client = Zenpy(**zendesk_credentials)
+    n_tickets = zenpy_client.tickets().count
+    _test_response(n_tickets, file, file_raw_data)
+
+
+def test_file_importer_all_tickets_api_parameters():
+    """Test the Zendesk File Importer via an integration test."""
+    # TODO (enias): Not supported by Steamship yet
 
 
 def _test_response(n_tickets, file, file_raw_data):

@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 
 from steamship import MimeTypes
-from steamship.app import Response, create_handler
+from steamship.app import Response, create_handler, post
 from steamship.base.error import SteamshipError
 from steamship.plugin.file_importer import FileImporter
 from steamship.plugin.inputs.file_import_plugin_input import FileImportPluginInput
@@ -38,6 +38,14 @@ class ZendeskFileImporter(FileImporter):
             Subdomain used to authenticate with Zendesk.
     """
 
+    @post("import")
+    def run_endpoint(self, **kwargs) -> Response[RawDataPluginOutput]:
+        """Start importing zendesk tickets to an archive file."""
+        self.config["n_tickets"] = kwargs.get("n_tickets", self.config["n_tickets"])
+        self.config["t_start"] = kwargs.get("t_start", self.config["t_start"])
+        self.config["t_end"] = kwargs.get("t_end", self.config["t_end"])
+        return self.run(PluginRequest[FileImportPluginInput](**kwargs))
+
     def run(self, request: PluginRequest[FileImportPluginInput]) -> Response[RawDataPluginOutput]:
         """Import zendesk tickets to an archive file.
 
@@ -57,9 +65,12 @@ class ZendeskFileImporter(FileImporter):
             tickets = []
             tickets_iterator = zenpy_client.tickets(created_between=[t_start, t_end])
             ix = 0
-            while ix < n_tickets:
-                tickets.append(next(tickets_iterator).to_dict())
-                ix += 1
+            try:
+                while n_tickets < 0 or ix < n_tickets:
+                    tickets.append(next(tickets_iterator).to_dict())
+                    ix += 1
+            except StopIteration:
+                pass
 
         except Exception as error:
             raise SteamshipError(

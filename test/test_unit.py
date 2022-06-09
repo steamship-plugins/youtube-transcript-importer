@@ -10,6 +10,7 @@ from steamship import MimeTypes
 from steamship.base.error import SteamshipError
 from steamship.plugin.inputs.file_import_plugin_input import FileImportPluginInput
 from steamship.plugin.service import PluginRequest
+from zenpy import Zenpy
 
 from src.api import DATETIME_FORMAT, ZendeskFileImporter
 
@@ -52,6 +53,30 @@ def test_zendesk_import_no_tickets_found():
     _test_response(n_tickets, response_endpoint.data)
 
 
+def test_zendesk_import_all_tickets():
+    """Unit test the Zendesk File Importer without any tickets."""
+    n_tickets = -1
+
+    config = _load_config(n_tickets, datetime.today() - timedelta(weeks=4), datetime.today())
+    importer = ZendeskFileImporter(config=config)
+
+    request = PluginRequest(data=FileImportPluginInput())
+    response_run = importer.run(request)
+
+    zendesk_credentials = {
+        "email": config["zendesk_email"],
+        "password": config["zendesk_password"],
+        "subdomain": config["zendesk_subdomain"],
+    }
+
+    zenpy_client = Zenpy(**zendesk_credentials)
+    n_tickets = zenpy_client.tickets().count
+    _test_response(n_tickets, response_run.data)
+
+    response_endpoint = importer.run_endpoint(**request.dict())
+    _test_response(n_tickets, response_endpoint.data)
+
+
 def test_zendesk_import_inverse_dates():
     """Unit test the Zendesk File Importer with swapping t_start and t_end."""
     n_tickets = 20
@@ -78,6 +103,17 @@ def test_zendesk_import_invalid_credentials():
 
     with pytest.raises(SteamshipError):
         _ = importer.run_endpoint(**request.dict())
+
+
+def test_zendesk_import_api_parameters():
+    """Unit test the Zendesk File Importer without triggering edge cases."""
+    n_tickets = 40
+    config = _load_config(0, datetime.today() - timedelta(weeks=4), datetime.today())
+    importer = ZendeskFileImporter(config=config)
+
+    request = PluginRequest(data=FileImportPluginInput())
+    response_endpoint = importer.run_endpoint(**request.dict(), n_tickets=n_tickets)
+    _test_response(n_tickets, response_endpoint.data)
 
 
 def _test_response(n_tickets, file_data):
