@@ -1,84 +1,45 @@
-"""Test zendesk-file-importer via integration tests."""
-import json
-from datetime import datetime, timedelta
-from test.test_unit import _load_config
+"""Test youtube-file-importer via integration tests."""
 
-from steamship import File, MimeTypes, Plugin, PluginInstance, Steamship
-from zenpy import Zenpy
+from test.test_unit import load_config
+from test.utils import TEST_URL
 
-FILE_IMPORTER_HANDLE = "zendesk-file-importer"
+import pytest
+from steamship import File, PluginInstance, Steamship
+
+FILE_IMPORTER_HANDLE = "youtube-file-importer"
 ENVIRONMENT = "staging"
 
 
-def _get_steamship_client():
-    return Steamship(profile=ENVIRONMENT)
+@pytest.fixture
+def youtube_importer() -> PluginInstance:
+    """Instantiate a youtube file importer."""
+    ship = Steamship(profile=ENVIRONMENT)
+    config = load_config()
 
-
-def _get_plugin_instance(config) -> PluginInstance:
-    client = _get_steamship_client()
-
-    plugin = Plugin.get(client, FILE_IMPORTER_HANDLE).data
-    assert plugin is not None
-    assert plugin.id is not None
-    plugin_instance = PluginInstance.create(
-        client,
+    plugin_instance = ship.use_plugin(
         plugin_handle=FILE_IMPORTER_HANDLE,
-        upsert=False,
-        plugin_id=plugin.id,
         config=config,
-    ).data
+    )
+
     assert plugin_instance is not None
     assert plugin_instance.id is not None
     return plugin_instance
 
 
-def test_file_importer():
-    """Test the Zendesk File Importer via an integration test."""
-    client = _get_steamship_client()
-    n_tickets = 20
-    config = _load_config(n_tickets, datetime.today() - timedelta(weeks=4), datetime.today())
+def test_file_importer(youtube_importer: PluginInstance) -> None:
+    """Test the Youtube File Importer via an integration test."""
+    client = Steamship(profile=ENVIRONMENT)
 
-    importer = _get_plugin_instance(config=config)
-
-    file = File.create(client, plugin_instance=importer.handle)
-    file.wait()
-    file = file.data
-    file_raw_data = file.raw().data
-    _test_response(n_tickets, file, file_raw_data)
+    file_creation_task = File.create_with_plugin(
+        client, plugin_instance=youtube_importer.handle, url=TEST_URL
+    )
+    file_creation_task.wait()
+    file = file_creation_task.output
+    _validate_file(file)
 
 
-def test_file_importer_all_tickets():
-    """Test the Zendesk File Importer via an integration test."""
-    client = _get_steamship_client()
-    n_tickets = -1
-    config = _load_config(n_tickets, datetime.today() - timedelta(weeks=4), datetime.today())
-
-    importer = _get_plugin_instance(config=config)
-
-    file = File.create(client, plugin_instance=importer.handle)
-    file.wait()
-    file = file.data
-    file_raw_data = file.raw().data
-
-    zendesk_credentials = {
-        "email": config["zendesk_email"],
-        "password": config["zendesk_password"],
-        "subdomain": config["zendesk_subdomain"],
-    }
-
-    zenpy_client = Zenpy(**zendesk_credentials)
-    n_tickets = zenpy_client.tickets().count
-    _test_response(n_tickets, file, file_raw_data)
-
-
-def test_file_importer_all_tickets_api_parameters():
-    """Test the Zendesk File Importer via an integration test."""
-    # TODO (enias): Not supported by Steamship yet
-
-
-def _test_response(n_tickets, file, file_raw_data):
-    assert file_raw_data is not None
-    assert isinstance(file_raw_data, bytes)
-    result = json.loads(file_raw_data)
-    assert len(result) == n_tickets
-    assert file.mime_type == MimeTypes.JSON
+def _validate_file(file: File) -> None:
+    raw_data = file.raw()
+    assert raw_data is not None
+    assert isinstance(raw_data, bytes)
+    assert file.mime_type in ("audio/mp4", "audio/webm")

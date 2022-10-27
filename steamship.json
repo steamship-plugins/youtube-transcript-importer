@@ -1,41 +1,32 @@
 {
-  "author": "",
-  "description": "",
   "entrypoint": "src.api.handler",
-  "handle": "zendesk-file-importer",
-  "name": "zendesk-file-importer",
+  "handle": "youtube-file-importer2",
+  "description": "test",
   "public": true,
   "type": "plugin",
-  "version": "0.0.1",
+  "version": "2.2.0",
   "plugin": {
     "isTrainable": false,
     "transport": "jsonOverHttp",
     "type": "fileImporter"
   },
-  "configTemplate": {
-    "n_tickets": {
-      "type": "number",
-      "description": "Number of tickets you want to scrape."
-    },
-    "t_start": {
-      "type": "string",
-      "description": "The start timestamp used to query Zendesk tickets."
-    },
-    "t_end": {
-      "type": "string",
-      "description": "The end timestamp used to query Zendesk tickets."
-    },
-    "zendesk_email": {
-      "type": "string",
-      "description": "Email used to authenticate with Zendesk."
-    },
-    "zendesk_password": {
-      "type": "string",
-      "description": "Password used to authenticate with Zendesk."
-    },
-    "zendesk_subdomain": {
-      "type": "string",
-      "description": "Subdomain used to authenticate with Zendesk."
-    }
+  "configTemplate": {},
+  "steamshipRegistry": {
+    "tagline": "Import Youtube audio.",
+    "tagline2": "Just pass the url of a youtube video and download its content to your workspace..",
+    "usefulFor": "Useful when you want to process youtube content.",
+    "videoUrl": null,
+    "githubUrl": "https://github.com/steamship-plugins/nlpcloud-tagger",
+    "demoUrl": null,
+    "blogUrl": null,
+    "jupyterUrl": null,
+    "authorName": "Steamship",
+    "authorEmail": "hello@steamship.com",
+    "authorTwitter": "@GetSteamship",
+    "authorUrl": "https://www.steamship.com/",
+    "tags": [
+      "Youtube",
+      "Importer"
+    ]
   }
 }

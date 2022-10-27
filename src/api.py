@@ -1,86 +1,56 @@
-"""File Importer for Zendesk tickets.
+"""File Importer for Youtube videos.
 
-Import zendesk tickets to a single file where each block represents a ticket.
+Import the audio of Youtube video's to a file.
 """
-import json
-from datetime import datetime
+import io
+import logging
+from typing import Type
 
-from steamship import MimeTypes
-from steamship.app import Response, create_handler, post
+from pytube import YouTube
 from steamship.base.error import SteamshipError
+from steamship.invocable import Config, InvocableResponse, create_handler
 from steamship.plugin.file_importer import FileImporter
 from steamship.plugin.inputs.file_import_plugin_input import FileImportPluginInput
 from steamship.plugin.outputs.raw_data_plugin_output import RawDataPluginOutput
-from steamship.plugin.service import PluginRequest
-from zenpy import Zenpy
-
-DATETIME_FORMAT = "%d/%m/%y %H:%M:%S"
+from steamship.plugin.request import PluginRequest
 
 
-class ZendeskFileImporter(FileImporter):
-    """File Importer for Zendesk tickets.
+class YoutubeFileImporter(FileImporter):
+    """File Importer for Youtube videos."""
 
-    Attributes
-    ----------
-    config : Dict[str, Any]
-        A dictionary containing the values for the following required configuration variables:
-        - n_tickets : int
-            The number of tickets that you want to scrape.
-        - t_start : datetime.datetime
-            The start timestamp used to query Zendesk tickets.
-        - t_end : datetime.datetime
-            The end timestamp used to query Zendesk tickets
-        - zendesk_email : str
-            Email used to authenticate with Zendesk.
-        - zendesk_password : str
-            Password used to authenticate with Zendesk.
-        - zendesk_subdomain : str
-            Subdomain used to authenticate with Zendesk.
-    """
+    def config_cls(self) -> Type[Config]:
+        """Config class used to create a YoutubeFileImporter."""
+        return Config
 
-    @post("import")
-    def run_endpoint(self, **kwargs) -> Response[RawDataPluginOutput]:
-        """Start importing zendesk tickets to an archive file."""
-        self.config["n_tickets"] = kwargs.get("n_tickets", self.config["n_tickets"])
-        self.config["t_start"] = kwargs.get("t_start", self.config["t_start"])
-        self.config["t_end"] = kwargs.get("t_end", self.config["t_end"])
-        return self.run(PluginRequest[FileImportPluginInput](**kwargs))
+    def run(
+        self, request: PluginRequest[FileImportPluginInput]
+    ) -> InvocableResponse[RawDataPluginOutput]:
+        """Import the audio from Youtube videos a Steamship file.
 
-    def run(self, request: PluginRequest[FileImportPluginInput]) -> Response[RawDataPluginOutput]:
-        """Import zendesk tickets to an archive file.
-
-        Each file represents an archive collecting a list of tickets.
+        Each file contains a raw binary containing the audio.
         """
-        n_tickets = int(self.config["n_tickets"])
-        t_start = datetime.strptime(self.config["t_start"], DATETIME_FORMAT)
-        t_end = datetime.strptime(self.config["t_end"], DATETIME_FORMAT)
-        zendesk_credentials = {
-            "email": self.config["zendesk_email"],
-            "password": self.config["zendesk_password"],
-            "subdomain": self.config["zendesk_subdomain"],
-        }
+        youtube_url = request.data.url
 
         try:
-            zenpy_client = Zenpy(**zendesk_credentials)
-            tickets = []
-            tickets_iterator = zenpy_client.tickets(created_between=[t_start, t_end])
-            ix = 0
-            try:
-                while n_tickets < 0 or ix < n_tickets:
-                    tickets.append(next(tickets_iterator).to_dict())
-                    ix += 1
-            except StopIteration:
-                pass
+            yt = YouTube(youtube_url)
+            audio_stream = sorted(
+                yt.streams.filter(only_audio=True), key=lambda x: -int(x.abr[:-4])
+            )[0]
+            stream = yt.streams.get_by_itag(audio_stream.itag)
+            buffer = io.BytesIO()
+            stream.stream_to_buffer(buffer)
+            buffer.seek(0)
 
-        except Exception as error:
+        except Exception as e:
+            logging.error(e)
             raise SteamshipError(
-                message="There was an error ingesting the support tickets from Zendesk.",
-                error=error,
+                message="There was an error downloading the audio stream from the given Youtube URL.",
+                error=e,
             )
 
-        return Response(
-            data=RawDataPluginOutput(string=json.dumps(tickets), mime_type=MimeTypes.JSON)
+        return InvocableResponse(
+            data=RawDataPluginOutput(_bytes=buffer, mime_type=audio_stream.mime_type)
         )
 
 
-handler = create_handler(ZendeskFileImporter)
+handler = create_handler(YoutubeFileImporter)
