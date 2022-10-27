@@ -17,7 +17,9 @@ ship = Steamship()
 plugin_instance = ship.use_plugin(
     plugin_handle=IMPORTER_HANDLE
 )
-file = File.create_with_plugin(ship, plugin_instance=plugin_instance.handle, URL="YOUR_URL")
+file_creation_task = File.create_with_plugin(ship, plugin_instance=plugin_instance.handle, URL="YOUR_URL")
+file_creation_task.wait()
+audio_bytes = file_creation_task.output.raw()
 ```
 
 ## Developing
