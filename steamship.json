@@ -1,10 +1,10 @@
 {
   "entrypoint": "src.api.handler",
-  "handle": "youtube-file-importer2",
-  "description": "test",
+  "handle": "youtube-file-importer",
+  "description": "Plugin to import youtube videos into your workspace.",
   "public": true,
   "type": "plugin",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "plugin": {
     "isTrainable": false,
     "transport": "jsonOverHttp",
