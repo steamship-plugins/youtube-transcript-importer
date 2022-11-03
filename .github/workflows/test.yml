@@ -4,10 +4,12 @@ on:
   pull_request:
     branches:
       - main
+      - staging
 
   push:
     branches:
       - main
+      - staging
 
 jobs:
   test:
@@ -21,7 +23,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.x"
+          python-version: "3.10"
       - name: Install Virtualenv
         run: |
           python3 -m venv .venv
@@ -37,3 +39,6 @@ jobs:
       - name: Run test suite
         run: |
           pytest test/test_unit.py
+        env:
+          STEAMSHIP_API_KEY: ${{ github.ref == 'refs/heads/main' && secrets.STEAMSHIP_API_KEY || secrets.STEAMSHIP_API_KEY_STAGING  }}
+          STEAMSHIP_API_BASE: ${{ github.ref == 'refs/heads/main' && secrets.STEAMSHIP_API_BASE || secrets.STEAMSHIP_API_BASE_STAGING }}
