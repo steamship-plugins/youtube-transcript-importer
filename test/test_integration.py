@@ -7,7 +7,7 @@ import pytest
 from steamship import File, PluginInstance, Steamship
 
 FILE_IMPORTER_HANDLE = "youtube-file-importer"
-ENVIRONMENT = "staging"
+ENVIRONMENT = "prod"
 
 
 @pytest.fixture
