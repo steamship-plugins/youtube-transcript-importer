@@ -8,7 +8,7 @@ from typing import Type
 
 from pytube import YouTube
 from steamship.base.error import SteamshipError
-from steamship.invocable import Config, InvocableResponse, create_handler
+from steamship.invocable import Config, InvocableResponse
 from steamship.plugin.file_importer import FileImporter
 from steamship.plugin.inputs.file_import_plugin_input import FileImportPluginInput
 from steamship.plugin.outputs.raw_data_plugin_output import RawDataPluginOutput
@@ -18,8 +18,9 @@ from steamship.plugin.request import PluginRequest
 class YoutubeFileImporter(FileImporter):
     """File Importer for Youtube videos."""
 
-    def config_cls(self) -> Type[Config]:
-        """Config class used to create a YoutubeFileImporter."""
+    @classmethod
+    def config_cls(cls) -> Type[Config]:
+        """Return the Configuration class."""
         return Config
 
     def run(
@@ -51,6 +52,3 @@ class YoutubeFileImporter(FileImporter):
         return InvocableResponse(
             data=RawDataPluginOutput(_bytes=buffer, mime_type=audio_stream.mime_type)
         )
-
-
-handler = create_handler(YoutubeFileImporter)

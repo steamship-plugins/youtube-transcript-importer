@@ -1,32 +1,37 @@
 {
-  "entrypoint": "src.api.handler",
-  "handle": "youtube-file-importer",
-  "description": "Plugin to import youtube videos into your workspace.",
-  "public": true,
-  "type": "plugin",
-  "version": "2.2.1",
-  "plugin": {
-    "isTrainable": false,
-    "transport": "jsonOverHttp",
-    "type": "fileImporter"
-  },
-  "configTemplate": {},
-  "steamshipRegistry": {
-    "tagline": "Import Youtube audio.",
-    "tagline2": "Just pass the url of a youtube video and download its content to your workspace..",
-    "usefulFor": "Useful when you want to process youtube content.",
-    "videoUrl": null,
-    "githubUrl": "https://github.com/steamship-plugins/nlpcloud-tagger",
-    "demoUrl": null,
-    "blogUrl": null,
-    "jupyterUrl": null,
-    "authorName": "Steamship",
-    "authorEmail": "hello@steamship.com",
-    "authorTwitter": "@GetSteamship",
-    "authorUrl": "https://www.steamship.com/",
-    "tags": [
-      "Youtube",
-      "Importer"
-    ]
-  }
+	"type": "plugin",
+	"handle": "youtube-file-importer",
+	"version": "2.2.4",
+	"description": "Plugin to import youtube videos into your workspace.",
+	"author": null,
+	"entrypoint": "Unused",
+	"public": true,
+	"plugin": {
+		"isTrainable": false,
+		"transport": "jsonOverHttp",
+		"type": "fileImporter"
+	},
+	"build_config": {
+		"ignore": []
+	},
+	"configTemplate": {},
+	"steamshipRegistry": {
+		"tagline": "Import Youtube audio.",
+		"tagline2": "Just pass the url of a youtube video and download its content to your workspace..",
+		"usefulFor": "Useful when you want to process youtube content.",
+		"videoUrl": null,
+		"githubUrl": null,
+		"demoUrl": null,
+		"blogUrl": null,
+		"jupyterUrl": null,
+		"authorGithub": null,
+		"authorName": "Steamship",
+		"authorEmail": "hello@steamship.com",
+		"authorTwitter": "@GetSteamship",
+		"authorUrl": "https://www.steamship.com/",
+		"tags": [
+			"Youtube",
+			"Importer"
+		]
+	}
 }
