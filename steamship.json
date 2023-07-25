@@ -1,8 +1,8 @@
 {
 	"type": "plugin",
-	"handle": "youtube-file-importer",
-	"version": "2.2.4",
-	"description": "Plugin to import youtube videos into your workspace.",
+	"handle": "youtube-transcript-importer",
+	"version": "0.0.1",
+	"description": "Plugin to import transcripts of youtube videos.",
 	"author": null,
 	"entrypoint": "Unused",
 	"public": true,
@@ -16,7 +16,7 @@
 	},
 	"configTemplate": {},
 	"steamshipRegistry": {
-		"tagline": "Import Youtube audio.",
+		"tagline": "Import Youtube transcripts.",
 		"tagline2": "Just pass the url of a youtube video and download its content to your workspace..",
 		"usefulFor": "Useful when you want to process youtube content.",
 		"videoUrl": null,

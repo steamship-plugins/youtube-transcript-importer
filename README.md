@@ -1,17 +1,17 @@
-# Youtube File Importer
+# Youtube Transcript Importer
 
-This plugin imports the audio from Youtube videos.
+This plugin imports the transcript from Youtube videos.
 
 ## Getting Started
 
 ### Usage
 
-Once deployed, the Youtube Importer can be used with the handle `youtube-file-importer`.
+Once deployed, the Youtube Importer can be used with the handle `youtube-transcript-importer`.
 
 ```python
 from steamship import File, Steamship
 
-IMPORTER_HANDLE = "youtube-file-importer"
+IMPORTER_HANDLE = "youtube-transcript-importer"
 ship = Steamship()
 
 plugin_instance = ship.use_plugin(

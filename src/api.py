@@ -1,30 +1,25 @@
-"""File Importer for Youtube videos.
-
-Import the audio of Youtube video's to a file.
-"""
-import io
 import logging
-from typing import Type
+from typing import Dict, Any
 
-from pytube import YouTube
+from langchain.document_loaders import YoutubeLoader
+from steamship import Tag, MimeTypes
 from steamship.base.error import SteamshipError
-from steamship.invocable import Config, InvocableResponse
+from steamship.invocable import InvocableResponse
 from steamship.plugin.file_importer import FileImporter
 from steamship.plugin.inputs.file_import_plugin_input import FileImportPluginInput
 from steamship.plugin.outputs.raw_data_plugin_output import RawDataPluginOutput
 from steamship.plugin.request import PluginRequest
 
 
-class YoutubeFileImporter(FileImporter):
-    """File Importer for Youtube videos."""
+def metadata_to_tags(metadata: Dict[str, Any]):
+    return [Tag(kind=k, name=v) for k, v in metadata.items()]
 
-    @classmethod
-    def config_cls(cls) -> Type[Config]:
-        """Return the Configuration class."""
-        return Config
+
+class YoutubeTranscriptFileImporter(FileImporter):
+    """File Importer that downloads the transcripts of Youtube videos."""
 
     def run(
-        self, request: PluginRequest[FileImportPluginInput]
+            self, request: PluginRequest[FileImportPluginInput]
     ) -> InvocableResponse[RawDataPluginOutput]:
         """Import the audio from Youtube videos a Steamship file.
 
@@ -33,22 +28,19 @@ class YoutubeFileImporter(FileImporter):
         youtube_url = request.data.url
 
         try:
-            yt = YouTube(youtube_url)
-            audio_stream = sorted(
-                yt.streams.filter(only_audio=True), key=lambda x: -int(x.abr[:-4])
-            )[0]
-            stream = yt.streams.get_by_itag(audio_stream.itag)
-            buffer = io.BytesIO()
-            stream.stream_to_buffer(buffer)
-            buffer.seek(0)
+            document = YoutubeLoader.from_youtube_url(
+                youtube_url, add_video_info=True
+            ).load()[0]
 
         except Exception as e:
             logging.error(e)
             raise SteamshipError(
-                message="There was an error downloading the audio stream from the given Youtube URL.",
+                message="There was an error downloading the transcript from the given Youtube URL.",
                 error=e,
             )
 
         return InvocableResponse(
-            data=RawDataPluginOutput(_bytes=buffer, mime_type=audio_stream.mime_type)
+            data=RawDataPluginOutput(string=document.page_content,
+                                     mime_type=MimeTypes.TXT,
+                                     tags=metadata_to_tags(document.metadata))
         )

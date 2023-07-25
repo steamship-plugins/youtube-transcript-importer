@@ -1,3 +1,4 @@
-steamship===2.17.0
-pytube==15.0.0
-moviepy
+youtube_transcript_api
+langchain==0.0.209
+steamship==2.17.20
+pytube
